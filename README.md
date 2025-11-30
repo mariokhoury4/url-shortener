@@ -158,7 +158,7 @@ The UI allows you to:
 - View request/response schemas
 - Explore error models
 
-#### ✳️ Create Short URL
+#### a. Create Short URL
 POST /links
 Request
 ```
@@ -185,13 +185,13 @@ Error Examples
 {"error": {"code": "ALIAS_CONFLICT", "message": "customAlias already exists"}}
 ```
 
-#### ✳️ Redirect Short URL
+#### b. Redirect Short URL
 GET /r/{shortCode}
 - Redirects (302) → target URL 
 - 404 → unknown alias 
 - 410 → expired
 
-#### ✳️ Get URL Details
+#### c. Get URL Details
 GET /links/{shortCode}
 Response
 ```
@@ -205,6 +205,39 @@ Response
   "lastAccessedAt": "2025-11-29T21:01:10",
   "status": "ACTIVE"
 }
+```
+
+#### d. Get List of Links
+GET /links
+Response
+- Returns a list of all stored short URLs with their metadata.   
+
+Successful Response (200) - example:
+```
+[
+    {
+        "shortCode": "mario-long",
+        "shortUrl": "http://localhost:8080/r/mario-long",
+        "targetUrl": "https://google.com
+        ",
+        "createdAt": "2025-11-29T12:05:12",
+        "expiresAt": "2025-12-01T23:59:59",
+        "clickCount": 42,
+        "lastAccessedAt": "2025-11-29T21:01:10",
+        "status": "ACTIVE"
+    },
+    {
+        "shortCode": "github-docs",
+        "shortUrl": "http://localhost:8080/r/github-docs",
+        "targetUrl": "https://docs.github.com
+        ",
+        "createdAt": "2025-11-30T09:15:00",
+        "expiresAt": "2026-01-01T00:00:00",
+        "clickCount": 3,
+        "lastAccessedAt": "2025-11-30T10:30:00",
+        "status": "ACTIVE"
+    }
+]
 ```
 
 ### 🧪 10. Testing Strategy

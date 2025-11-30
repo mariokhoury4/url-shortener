@@ -6,6 +6,7 @@ import com.example.urlShortenerService.model.CreateUrlInput;
 import com.example.urlShortenerService.model.CreateUrlOutput;
 import com.example.urlShortenerService.model.LinkDetailsOutput;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
 
 public interface UrlManager {
 
@@ -34,4 +35,12 @@ public interface UrlManager {
      * @throws ShortUrlNotFoundException if it is not found (404)
      */
     LinkDetailsOutput getLinkDetails(@NonNull final String shortCode);
+
+    /**
+     * Get all the links that are created
+     * @param page the number of pages to retrieve
+     * @param size the size of each page
+     * @return return all the link details output
+     */
+    Page<LinkDetailsOutput> listLinks(final int page, final int size);
 }

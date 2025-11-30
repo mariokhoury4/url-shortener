@@ -15,8 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -225,4 +230,37 @@ public class UrlManagerTest {
         assertThrowsExactly(ShortUrlNotFoundException.class, () -> urlManager.getLinkDetails(CUSTOM_ALIAS),
                 "Expected getTargetUrl to throw ShortUrlNotFoundException, but it didn't");
     }
+
+    @Test
+    void givenUrlsInDb_whenListLinks_thenReturnMappedPage() {
+        // arrange
+        final Url url = new Url(
+                TARGET_URL,
+                CUSTOM_ALIAS,
+                EXPIRED_DATE
+        );
+
+        when(props.getRedirectDomain()).thenReturn("http://localhost:8080/r/");
+
+        final Page<Url> pageFromDb =
+                new PageImpl<>(List.of(url), PageRequest.of(0, 20), 1);
+
+        when(dbClient.findAll(any(Pageable.class))).thenReturn(pageFromDb);
+
+        // act
+        final Page<LinkDetailsOutput> result = urlManager.listLinks(0, 20);
+
+        // assert
+        assertEquals(1, result.getTotalElements());
+        final LinkDetailsOutput out = result.getContent().get(0);
+
+        assertEquals(CUSTOM_ALIAS, out.getShortCode());
+        assertEquals("http://localhost:8080/r/" + CUSTOM_ALIAS, out.getShortUrl());
+        assertEquals(TARGET_URL, out.getTargetUrl());
+
+        verify(dbClient).findAll(any(Pageable.class));
+    }
+
+
+
 }

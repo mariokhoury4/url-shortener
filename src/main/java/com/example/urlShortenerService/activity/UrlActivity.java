@@ -6,12 +6,14 @@ import com.example.urlShortenerService.model.CreateUrlOutput;
 import com.example.urlShortenerService.model.LinkDetailsOutput;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -69,6 +71,21 @@ public class UrlActivity {
     public ResponseEntity<LinkDetailsOutput> getLinkDetails(@PathVariable final String shortCode) {
         log.info("HTTP GET /links/{} received", shortCode);
         return ResponseEntity.ok(manager.getLinkDetails(shortCode));
+    }
+
+    /**
+     * Get all the link and return a list of them
+     * @param page number of pages to query
+     * @param size size of the pages
+     * @return the list of links
+     */
+    @GetMapping("/links")
+    public Page<LinkDetailsOutput> listLinks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        log.info("HTTP GET /links received");
+        return manager.listLinks(page, size);
     }
 
 }

@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -182,6 +183,23 @@ class UrlActivityIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void givenExistingUrls_whenListLinks_thenReturnPagedResult() throws Exception {
+        // arrange
+        final Url url1 = new Url("https://google.com", "code1",
+                LocalDateTime.now().plusDays(1));
+        final Url url2 = new Url("https://github.com", "code2",
+                LocalDateTime.now().plusDays(1));
 
+        urlRepository.saveAll(List.of(url1, url2));
 
+        // act + assert
+        mockMvc.perform(get("/links")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].shortCode").value("code2")) // sorted by createdAt desc
+                .andExpect(jsonPath("$.content[1].shortCode").value("code1"));
+    }
 }

@@ -12,11 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -28,6 +32,8 @@ import static org.mockito.Mockito.when;
 public class UrlActivityTest {
     private static final String SHORT_CODE = "shortCode";
     private static final String LONG_URL = "http://IAmAVeryLongUrl.com/";
+    private static final String SHORT_URL = "http://localhost:8080/r/code1";
+    private static final String TARGET_URL = "https://google.com";
 
 
     @Mock
@@ -142,5 +148,28 @@ public class UrlActivityTest {
                 () -> urlActivity.getLinkDetails(SHORT_CODE));
 
         verify(manager, times(1)).getLinkDetails(SHORT_CODE);
+    }
+
+    @Test
+    void givenLinksExist_whenListLinks_thenReturnPage() {
+        // arrange
+        LinkDetailsOutput l1 = LinkDetailsOutput.builder()
+                .shortCode(SHORT_CODE)
+                .shortUrl(SHORT_URL)
+                .targetUrl(TARGET_URL)
+                .build();
+
+        Page<LinkDetailsOutput> expected =
+                new PageImpl<>(List.of(l1), PageRequest.of(0, 20), 1);
+
+        when(manager.listLinks(0, 20)).thenReturn(expected);
+
+        // act
+        Page<LinkDetailsOutput> actual = urlActivity.listLinks(0, 20);
+
+        // assert
+        assertEquals(expected.getTotalElements(), actual.getTotalElements());
+        assertEquals(expected.getContent(), actual.getContent());
+        verify(manager).listLinks(0, 20);
     }
 }

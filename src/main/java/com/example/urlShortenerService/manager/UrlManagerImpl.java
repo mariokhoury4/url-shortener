@@ -14,6 +14,10 @@ import com.example.urlShortenerService.model.CreateUrlOutput;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -141,6 +145,27 @@ public class UrlManagerImpl implements UrlManager {
                 .lastAccessedAt(url.getLastAccessedAt())
                 .status(status)
                 .build();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Page<LinkDetailsOutput> listLinks(final int page, final int size) {
+        log.info("Listing all links");
+        final Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return dbClient.findAll(pageable)
+                .map(url -> LinkDetailsOutput.builder()
+                        .shortCode(url.getCustomAlias())
+                        .shortUrl(props.getRedirectDomain() + url.getCustomAlias())
+                        .targetUrl(url.getTargetUrl())
+                        .createdAt(url.getCreatedAt())
+                        .expiresAt(url.getExpiresAt())
+                        .clickCount(url.getClickCount())
+                        .lastAccessedAt(url.getLastAccessedAt())
+                        .status(url.isExpired() ? LinkStatus.EXPIRED : LinkStatus.ACTIVE)
+                        .build());
     }
 
 }
