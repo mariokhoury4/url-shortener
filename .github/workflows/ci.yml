@@ -33,3 +33,38 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t url-shortener:ci .
+
+  load-test:
+    # run only after tests, and optionally only on main/master push
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build app (skip tests)
+        run: mvn -B clean package -DskipTests
+
+      - name: Start Spring Boot app
+        run: |
+          nohup java -jar target/*.jar &
+          sleep 20
+
+      - name: Install k6
+        run: |
+          curl -sSL https://github.com/grafana/k6/releases/download/v0.52.0/k6-v0.52.0-linux-amd64.tar.gz -o k6.tar.gz
+          tar -xzf k6.tar.gz
+          sudo mv k6-v0.52.0-linux-amd64/k6 /usr/local/bin/k6
+
+      - name: Run k6 load test
+        run: k6 run load-test.js
+        env:
+          BASE_URL: http://localhost:8080
