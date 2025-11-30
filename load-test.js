@@ -7,6 +7,13 @@ export const options = {
     { duration: '30s', target: 50 },
     { duration: '10s', target: 0 },
   ],
+  thresholds: {
+    // At least 95% of all checks must pass
+    checks: ['rate > 0.95'],
+
+    // Optional: 95th percentile of response time for *successful* requests < 500ms
+    'http_req_duration{expected_response:true}': ['p(95) < 500'],
+  },
 };
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
@@ -22,7 +29,8 @@ export function setup() {
   });
 
   check(res, {
-    'created mario-long': (r) => r.status === 200 || r.status === 201 || r.status === 409,
+    'created mario-long': (r) =>
+      r.status === 200 || r.status === 201 || r.status === 409,
   });
 
   return {};

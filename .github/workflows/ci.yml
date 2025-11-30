@@ -55,14 +55,12 @@ jobs:
 
       - name: Start Spring Boot app
         run: |
-          nohup java -jar target/*.jar &
+          JAR_FILE=$(ls target/*-SNAPSHOT.jar | head -n 1)
+          nohup java -jar "$JAR_FILE" &
           sleep 20
 
-      - name: Install k6
-        run: |
-          curl -sSL https://github.com/grafana/k6/releases/download/v0.52.0/k6-v0.52.0-linux-amd64.tar.gz -o k6.tar.gz
-          tar -xzf k6.tar.gz
-          sudo mv k6-v0.52.0-linux-amd64/k6 /usr/local/bin/k6
+      - name: Set up k6
+        uses: grafana/setup-k6-action@v1
 
       - name: Run k6 load test
         run: k6 run load-test.js
