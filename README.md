@@ -146,7 +146,18 @@ Redirect flow:
   - Return HTTP 302 redirect 
 Only successful redirects increment clicks.
 
-### 📈 9. API Documentation
+### 9. 📈  API Documentation (Swagger / OpenAPI)
+This service includes auto-generated API documentation using **springdoc-openapi**.   
+Once the application is running, you can access:
+- **Swagger UI:** http://localhost:8080/swagger-ui/index.html
+- **OpenAPI JSON:** http://localhost:8080/v3/api-docs
+
+The UI allows you to:
+- Inspect all endpoints
+- Try API calls directly from the browser
+- View request/response schemas
+- Explore error models
+
 #### ✳️ Create Short URL
 POST /links
 Request
