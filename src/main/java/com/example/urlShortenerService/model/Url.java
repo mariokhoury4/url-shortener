@@ -58,7 +58,7 @@ public class Url {
         return expiresAt != null && expiresAt.isBefore(LocalDateTime.now());
     }
 
-    public void increaseClicks() {
+    public void registerClick() {
         clickCount = clickCount + 1;
         lastAccessedAt = LocalDateTime.now();
     }

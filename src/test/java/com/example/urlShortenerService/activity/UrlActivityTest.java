@@ -19,6 +19,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,31 +81,29 @@ public class UrlActivityTest {
     }
 
     @Test
-    public void givenExpiredShortCode_whenRedirect_thenReturnGoneHTTPResponse() {
+    public void givenExpiredShortCode_whenRedirect_thenThrowsShortUrlExpiredException() {
         // arrange
-        final ResponseEntity<Void> expectedResponse = ResponseEntity.status(HttpStatus.GONE).build();
-        when(manager.getTargetUrl(SHORT_CODE)).thenThrow(new ShortUrlExpiredException("Short URL has expired"));
+        when(manager.getTargetUrl(SHORT_CODE))
+                .thenThrow(new ShortUrlExpiredException("Short URL has expired"));
 
-        // test
-        final ResponseEntity<Void> actualResponse = urlActivity.redirect(SHORT_CODE);
+        // test + assert
+        assertThrowsExactly(ShortUrlExpiredException.class,
+                () -> urlActivity.redirect(SHORT_CODE));
 
-        // assert
         verify(manager, times(1)).getTargetUrl(SHORT_CODE);
-        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
-    public void givenWrongShortCode_whenRedirect_thenReturnNotFound() {
+    public void givenWrongShortCode_whenRedirect_thenThrowsShortUrlNotFoundException() {
         // arrange
-        final ResponseEntity<Void> expectedResponse = ResponseEntity.notFound().build();
-        when(manager.getTargetUrl(SHORT_CODE)).thenThrow(new ShortUrlNotFoundException("Short URL not found"));
+        when(manager.getTargetUrl(SHORT_CODE))
+                .thenThrow(new ShortUrlNotFoundException("Short URL not found"));
 
-        // test
-        final ResponseEntity<Void> actualResponse = urlActivity.redirect(SHORT_CODE);
+        // test + assert
+        assertThrowsExactly(ShortUrlNotFoundException.class,
+                () -> urlActivity.redirect(SHORT_CODE));
 
-        // assert
         verify(manager, times(1)).getTargetUrl(SHORT_CODE);
-        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
@@ -133,16 +132,15 @@ public class UrlActivityTest {
     }
 
     @Test
-    public void givenUnavailableShortCode_whenGetLinkDetails_thenNotFound() {
+    public void givenUnavailableShortCode_whenGetLinkDetails_thenThrowsShortUrlNotFoundException() {
         // arrange
-        final ResponseEntity<LinkDetailsOutput> expectedResponse = ResponseEntity.notFound().build();
-        when(manager.getLinkDetails(SHORT_CODE)).thenThrow(ShortUrlNotFoundException.class);
+        when(manager.getLinkDetails(SHORT_CODE))
+                .thenThrow(new ShortUrlNotFoundException("Short URL not found"));
 
-        // test
-        final ResponseEntity<LinkDetailsOutput> actualResponse = urlActivity.getLinkDetails(SHORT_CODE);
+        // test + assert
+        assertThrowsExactly(ShortUrlNotFoundException.class,
+                () -> urlActivity.getLinkDetails(SHORT_CODE));
 
-        // assert
         verify(manager, times(1)).getLinkDetails(SHORT_CODE);
-        assertEquals(expectedResponse, actualResponse);
     }
 }

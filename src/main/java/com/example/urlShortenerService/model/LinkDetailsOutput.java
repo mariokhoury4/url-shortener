@@ -15,5 +15,5 @@ public class LinkDetailsOutput {
     private LocalDateTime expiresAt;
     private long clickCount;
     private LocalDateTime lastAccessedAt;
-    private LinkStatus status; // "ACTIVE" or "EXPIRED"
+    private LinkStatus status;
 }

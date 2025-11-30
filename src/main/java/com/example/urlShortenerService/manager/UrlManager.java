@@ -1,5 +1,6 @@
 package com.example.urlShortenerService.manager;
 
+import com.example.urlShortenerService.exception.AliasConflictException;
 import com.example.urlShortenerService.exception.ShortUrlExpiredException;
 import com.example.urlShortenerService.exception.ShortUrlNotFoundException;
 import com.example.urlShortenerService.exception.ShortUrlNotValidException;
@@ -10,6 +11,7 @@ import com.example.urlShortenerService.client.database.UrlRepository;
 import com.example.urlShortenerService.model.CreateUrlInput;
 import com.example.urlShortenerService.model.CreateUrlOutput;
 import lombok.NonNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
@@ -49,11 +51,21 @@ public class UrlManager {
         // Create the URL that should be saved in the Database
         final Url url = new Url(
                 createUrlInput.getTargetUrl(),
-                createUrlInput.getCustomAlias() != null ? createUrlInput.getCustomAlias() : UUID.randomUUID().toString().substring(0, 10),
-                createUrlInput.getExpiresAt() != null ? createUrlInput.getExpiresAt() : LocalDateTime.now().plusYears(1));
+                createUrlInput.getCustomAlias() != null
+                        ? createUrlInput.getCustomAlias()
+                        : UUID.randomUUID().toString().substring(0, 10),
+                createUrlInput.getExpiresAt() != null
+                        ? createUrlInput.getExpiresAt()
+                        : LocalDateTime.now().plusYears(1));
 
         // Save the Url to the DB
-        final Url createdUrl = dbClient.save(url);
+        final Url createdUrl;
+
+        try {
+            createdUrl = dbClient.save(url);
+        } catch (final DataIntegrityViolationException e) {
+            throw new AliasConflictException("The custom alias is already in use: " + url.getCustomAlias());
+        }
 
         // Building the output object that will be returned to the client
         return CreateUrlOutput
@@ -86,7 +98,7 @@ public class UrlManager {
             throw new ShortUrlExpiredException("Short URL has expired");
         }
 
-        url.increaseClicks();
+        url.registerClick();
         dbClient.save(url);
 
         // Return the targetUrl

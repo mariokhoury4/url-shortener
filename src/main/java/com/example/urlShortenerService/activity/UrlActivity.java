@@ -1,14 +1,10 @@
 package com.example.urlShortenerService.activity;
 
-import com.example.urlShortenerService.exception.ShortUrlExpiredException;
-import com.example.urlShortenerService.exception.ShortUrlNotFoundException;
-import com.example.urlShortenerService.exception.ShortUrlNotValidException;
 import com.example.urlShortenerService.manager.UrlManager;
 import com.example.urlShortenerService.model.CreateUrlInput;
 import com.example.urlShortenerService.model.CreateUrlOutput;
 import com.example.urlShortenerService.model.LinkDetailsOutput;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
-import java.util.NoSuchElementException;
 
 /**
  * Url Activity
@@ -54,17 +49,11 @@ public class UrlActivity {
      */
     @GetMapping("/r/{shortCode}")
     public ResponseEntity<Void> redirect(@PathVariable final String shortCode) {
-        try {
-            final String targetUrl = manager.getTargetUrl(shortCode);
-            return ResponseEntity
-                    .status(HttpStatus.FOUND)
-                    .location(URI.create(targetUrl))
-                    .build();
-        } catch (ShortUrlNotFoundException e) {
-            return ResponseEntity.notFound().build(); // 404
-        } catch (ShortUrlExpiredException e) {
-            return ResponseEntity.status(HttpStatus.GONE).build(); // 410 Gone
-        }
+        final String targetUrl = manager.getTargetUrl(shortCode);
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(targetUrl))
+                .build();
     }
 
     /**
@@ -74,11 +63,7 @@ public class UrlActivity {
      */
     @GetMapping("/links/{shortCode}")
     public ResponseEntity<LinkDetailsOutput> getLinkDetails(@PathVariable final String shortCode) {
-        try {
-            return ResponseEntity.ok(manager.getLinkDetails(shortCode));
-        } catch (ShortUrlNotFoundException e) {
-            return ResponseEntity.notFound().build(); // 404 if short code does not exist
-        }
+        return ResponseEntity.ok(manager.getLinkDetails(shortCode));
     }
 
 }
