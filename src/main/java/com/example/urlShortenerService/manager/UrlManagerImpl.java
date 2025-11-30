@@ -4,7 +4,6 @@ import com.example.urlShortenerService.config.ShortenerProperties;
 import com.example.urlShortenerService.exception.AliasConflictException;
 import com.example.urlShortenerService.exception.ShortUrlExpiredException;
 import com.example.urlShortenerService.exception.ShortUrlNotFoundException;
-import com.example.urlShortenerService.exception.ShortUrlNotValidException;
 import com.example.urlShortenerService.model.LinkDetailsOutput;
 import com.example.urlShortenerService.model.LinkStatus;
 import com.example.urlShortenerService.model.TargetUrl;
@@ -17,9 +16,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
