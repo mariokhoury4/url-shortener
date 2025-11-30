@@ -1,4 +1,4 @@
-##📄 URL Shortener Service
+## 📄 URL Shortener Service
 A lightweight, production-style URL Shortener service built with Java, Spring Boot, JPA, and an H2 in-memory database.
 This service follows clean, layered architecture principles and demonstrates URL creation, redirect resolution, expiration management, and link analytics.
 
@@ -106,16 +106,24 @@ All errors follow a consistent structure:
   }
 }
 ```
+Example:
+```
+{
+  "code": "NOT_FOUND",
+  "message": "Short URL not found"
+}
+
+```
 
 Error Codes Returned:
 
-| Scenario             | HTTP | Code             |
-| -------------------- | ---- | ---------------- |
-| Invalid input        | 400  | `INVALID_INPUT`  |
-| Alias already exists | 409  | `ALIAS_CONFLICT` |
-| Short code not found | 404  | `NOT_FOUND`      |
-| URL expired          | 410  | `EXPIRED_URL`    |
-| Internal error       | 500  | `INTERNAL_ERROR` |
+| HTTP Status | Code             | Description                 |
+| ----------- | ---------------- | --------------------------- |
+| **400**     | `INVALID_URL`    | Target URL is malformed     |
+| **404**     | `NOT_FOUND`      | Short code does not exist   |
+| **409**     | `ALIAS_CONFLICT` | Custom alias already in use |
+| **410**     | `EXPIRED_URL`    | Short URL has expired       |
+
 
 ### ⚙️ 7. Concurrency & Uniqueness
 In this implementation:
@@ -199,10 +207,17 @@ Integration Tests:
 - Full controller endpoints using Spring Boot Test 
 - Alias conflict handling 
 - Redirect behavior
-All tests run via:
-```mvn test```
 
-###🚀 11. Running the Application
+Run all tests (unit + integration), Checkstyle, and JaCoCo in one go:   
+```
+mvn clean verify
+```   
+After the build, you can open the coverage report at:   
+```
+target/site/jacoco/index.html
+```
+
+### 🚀 11. Running the Application
 Clone & run
 ```
 git clone https://github.com/YOUR_USER/url-shortener-service.git
@@ -217,7 +232,18 @@ http://localhost:8080/h2-console
 
 JDBC URL: jdbc:h2:mem:testdb
 
-### 🔮 12. Future Enhancements (Technical Roadmap)
+### 12. CI / GitHub Actions
+This project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs on every push and pull request to `main`:
+
+1. **Build & Test**
+   - Runs `mvn clean verify` (tests, JaCoCo coverage, Checkstyle).
+
+2. **Docker Build**
+   - Builds the Docker image using the provided `Dockerfile` to ensure the service is containerizable.
+
+You can see the status and logs under the **Actions** tab in the GitHub repository.
+
+### 🔮 13. Future Enhancements (Technical Roadmap)
 Production-grade improvements
 - Switch to PostgreSQL / DynamoDB 
 - Add caching layer (Redis) for hot URLs 
