@@ -241,13 +241,13 @@ Successful Response (200) - example:
 ```
 
 ### 🧪 10. Testing Strategy
-Unit Tests
+#### a. Unit Tests
 - Service-layer tests 
 - Validation logic 
 - Expiration logic 
 - Stats increment behavior
 
-Integration Tests:
+#### b. Integration Tests:
 - Full controller endpoints using Spring Boot Test 
 - Alias conflict handling 
 - Redirect behavior
@@ -259,6 +259,18 @@ mvn clean verify
 After the build, you can open the coverage report at:   
 ```
 target/site/jacoco/index.html
+```
+
+#### c. Load Testing:    
+This project includes a simple load test using [k6](https://k6.io) to stress the redirect and details endpoints.
+
+Script: `load-test.js`
+
+Run:
+
+```
+mvn spring-boot:run      -- in a terminal
+k6 run load-test.js      -- in a second terminal
 ```
 
 ### 🚀 11. Running the Application

@@ -1,0 +1,44 @@
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '10s', target: 10 },
+    { duration: '30s', target: 50 },
+    { duration: '10s', target: 0 },
+  ],
+};
+
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
+
+export function setup() {
+  const payload = JSON.stringify({
+    targetUrl: 'https://google.com',
+    customAlias: 'mario-long',
+  });
+
+  const res = http.post(`${BASE_URL}/links`, payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  check(res, {
+    'created mario-long': (r) => r.status === 200 || r.status === 201 || r.status === 409,
+  });
+
+  return {};
+}
+
+export default function () {
+  const redirectRes = http.get(`${BASE_URL}/r/mario-long`, { redirects: 0 });
+  const detailsRes = http.get(`${BASE_URL}/links/mario-long`);
+
+  check(redirectRes, {
+    'redirect status is 302': (r) => r.status === 302,
+  });
+
+  check(detailsRes, {
+    'details status is 200': (r) => r.status === 200,
+  });
+
+  sleep(1);
+}
