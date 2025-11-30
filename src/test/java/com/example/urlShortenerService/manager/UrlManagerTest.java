@@ -1,6 +1,7 @@
 package com.example.urlShortenerService.manager;
 
 import com.example.urlShortenerService.client.database.UrlRepository;
+import com.example.urlShortenerService.config.ShortenerProperties;
 import com.example.urlShortenerService.exception.ShortUrlExpiredException;
 import com.example.urlShortenerService.exception.ShortUrlNotFoundException;
 import com.example.urlShortenerService.model.CreateUrlInput;
@@ -8,6 +9,7 @@ import com.example.urlShortenerService.model.CreateUrlOutput;
 import com.example.urlShortenerService.model.LinkDetailsOutput;
 import com.example.urlShortenerService.model.LinkStatus;
 import com.example.urlShortenerService.model.Url;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,8 +43,17 @@ public class UrlManagerTest {
     @Mock
     private UrlRepository dbClient;
 
+    @Mock
+    private ShortenerProperties props;
+
     @InjectMocks
-    private UrlManager urlManager;
+    private UrlManagerImpl urlManager;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(props.getRedirectDomain())
+                .thenReturn("http://localhost:8080/r/");
+    }
 
     @Test
     public void givenCorrectCreateUrlInput_whenCreateUrl_thenReturnCorrectCreateUrlOutput() {
