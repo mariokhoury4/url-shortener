@@ -12,6 +12,7 @@ import com.example.urlShortenerService.client.database.UrlRepository;
 import com.example.urlShortenerService.model.CreateUrlInput;
 import com.example.urlShortenerService.model.CreateUrlOutput;
 import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.UUID;
 /**
  * Manage the logic of the CreateUrl API.
  */
+@Log4j2
 @Service
 public class UrlManagerImpl implements UrlManager {
     /**
@@ -48,6 +50,10 @@ public class UrlManagerImpl implements UrlManager {
      */
     @Override
     public CreateUrlOutput createUrl(@NonNull final CreateUrlInput createUrlInput)  {
+        log.info("CreateUrl request: targetUrl={}, customAlias={}",
+                createUrlInput.getTargetUrl(),
+                createUrlInput.getCustomAlias());
+
         validateCreateUrlInput(createUrlInput);
 
         // Create the URL that should be saved in the Database
@@ -66,8 +72,11 @@ public class UrlManagerImpl implements UrlManager {
         try {
             createdUrl = dbClient.save(url);
         } catch (final DataIntegrityViolationException e) {
+            log.warn("Alias conflict for customAlias={}", url.getCustomAlias());
             throw new AliasConflictException("The custom alias is already in use: " + url.getCustomAlias());
         }
+        log.info("Short URL created: alias={}, id={}", createdUrl.getCustomAlias(), createdUrl.getId());
+
 
         // Building the output object that will be returned to the client
         return CreateUrlOutput
@@ -86,18 +95,25 @@ public class UrlManagerImpl implements UrlManager {
      */
     @Override
     public String getTargetUrl(@NonNull final String shortCode) {
+        log.info("Redirect request for alias={}", shortCode);
+
         // Retrieve the URL from the shortCode
         final Url url = dbClient.findByCustomAlias(shortCode)
-                .orElseThrow(() -> new ShortUrlNotFoundException("Short URL not found"));
+                .orElseThrow(() -> {
+                    log.warn("Redirect failed: alias={} not found", shortCode);
+                    return new ShortUrlNotFoundException("Short URL not found");
+                });
 
         // Check if the URL is expired
         if (url.isExpired()) {
+            log.warn("Redirect failed: alias={} is expired", shortCode);
             throw new ShortUrlExpiredException("Short URL has expired");
         }
 
         url.registerClick();
         dbClient.save(url);
 
+        log.info("Redirect success: alias={} -> {}", shortCode, url.getTargetUrl());
         // Return the targetUrl
         return url.getTargetUrl();
     }
@@ -107,12 +123,17 @@ public class UrlManagerImpl implements UrlManager {
      */
     @Override
     public LinkDetailsOutput getLinkDetails(@NonNull final String shortCode) {
+        log.info("LinkDetails request for alias={}", shortCode);
         final Url url = dbClient.findByCustomAlias(shortCode)
-                .orElseThrow(() -> new ShortUrlNotFoundException("Short URL not found"));
+                .orElseThrow(() -> {
+                    log.warn("LinkDetails not found: alias={}", shortCode);
+                    return new ShortUrlNotFoundException("Short URL not found");
+                });
 
         final boolean expired = url.isExpired();
         final LinkStatus status = expired ? LinkStatus.EXPIRED : LinkStatus.ACTIVE;
 
+        log.info("LinkDetails delivered: alias={}, status={}", shortCode, status);
         return LinkDetailsOutput.builder()
                 .shortCode(url.getCustomAlias())
                 .shortUrl(props.getRedirectDomain() + url.getCustomAlias())
@@ -133,8 +154,10 @@ public class UrlManagerImpl implements UrlManager {
      */
     private void validateCreateUrlInput(final CreateUrlInput createUrlInput) {
         try {
+            log.debug("Validating targetUrl={}", createUrlInput.getTargetUrl());
             new URL(createUrlInput.getTargetUrl()).toURI();
         } catch (MalformedURLException | URISyntaxException e) {
+            log.warn("Invalid target URL: {}", createUrlInput.getTargetUrl());
             throw new ShortUrlNotValidException("TargetUrl is not a valid URL: " + e);
         }
     }

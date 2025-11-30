@@ -5,6 +5,7 @@ import com.example.urlShortenerService.model.CreateUrlInput;
 import com.example.urlShortenerService.model.CreateUrlOutput;
 import com.example.urlShortenerService.model.LinkDetailsOutput;
 import jakarta.validation.Valid;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import java.net.URI;
 /**
  * Url Activity
  */
+@Log4j2
 @RestController
 public class UrlActivity {
 
@@ -39,6 +41,7 @@ public class UrlActivity {
      */
     @PostMapping("/links")
     public CreateUrlOutput createUrl(@Valid @RequestBody final CreateUrlInput createUrlInput) {
+        log.info("HTTP POST /links received");
         return manager.createUrl(createUrlInput);
     }
 
@@ -49,6 +52,7 @@ public class UrlActivity {
      */
     @GetMapping("/r/{shortCode}")
     public ResponseEntity<Void> redirect(@PathVariable final String shortCode) {
+        log.info("HTTP GET /r/{} received", shortCode);
         final String targetUrl = manager.getTargetUrl(shortCode);
         return ResponseEntity
                 .status(HttpStatus.FOUND)
@@ -63,6 +67,7 @@ public class UrlActivity {
      */
     @GetMapping("/links/{shortCode}")
     public ResponseEntity<LinkDetailsOutput> getLinkDetails(@PathVariable final String shortCode) {
+        log.info("HTTP GET /links/{} received", shortCode);
         return ResponseEntity.ok(manager.getLinkDetails(shortCode));
     }
 
