@@ -7,6 +7,7 @@ import com.example.urlShortenerService.exception.ShortUrlNotFoundException;
 import com.example.urlShortenerService.exception.ShortUrlNotValidException;
 import com.example.urlShortenerService.model.LinkDetailsOutput;
 import com.example.urlShortenerService.model.LinkStatus;
+import com.example.urlShortenerService.model.TargetUrl;
 import com.example.urlShortenerService.model.Url;
 import com.example.urlShortenerService.client.database.UrlRepository;
 import com.example.urlShortenerService.model.CreateUrlInput;
@@ -54,7 +55,7 @@ public class UrlManagerImpl implements UrlManager {
                 createUrlInput.getTargetUrl(),
                 createUrlInput.getCustomAlias());
 
-        validateCreateUrlInput(createUrlInput);
+        final TargetUrl targetUrl = new TargetUrl(createUrlInput.getTargetUrl());
 
         // Create the URL that should be saved in the Database
         final Url url = new Url(
@@ -144,22 +145,6 @@ public class UrlManagerImpl implements UrlManager {
                 .lastAccessedAt(url.getLastAccessedAt())
                 .status(status)
                 .build();
-    }
-
-    /**
-     * Validate if the createUrlInput is valid
-     * Check if the Long Url is actually a valid url
-     * @param createUrlInput
-     * @throws ShortUrlNotValidException if the Url is not valide
-     */
-    private void validateCreateUrlInput(final CreateUrlInput createUrlInput) {
-        try {
-            log.debug("Validating targetUrl={}", createUrlInput.getTargetUrl());
-            new URL(createUrlInput.getTargetUrl()).toURI();
-        } catch (MalformedURLException | URISyntaxException e) {
-            log.warn("Invalid target URL: {}", createUrlInput.getTargetUrl());
-            throw new ShortUrlNotValidException("TargetUrl is not a valid URL: " + e);
-        }
     }
 
 }
