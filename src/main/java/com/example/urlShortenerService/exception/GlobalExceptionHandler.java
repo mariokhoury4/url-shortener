@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * Global Exception Handler for the URL Shortener Service
  */
 @Log4j2
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.example.urlShortenerService")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ShortUrlNotValidException.class)
