@@ -30,6 +30,11 @@ import java.util.UUID;
 @Service
 public class UrlManagerImpl implements UrlManager {
 
+    /**
+     * Maximum allowed page size for link listings to avoid excessive memory usage.
+     */
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final UrlRepository dbClient;
     private final ShortenerProperties props;
 
@@ -134,11 +139,24 @@ public class UrlManagerImpl implements UrlManager {
      */
     @Override
     public Page<LinkDetailsOutput> listLinks(final int page, final int size) {
-        log.info("Listing all links: page={}, size={}", page, size);
-        final Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        final int safePage = Math.max(0, page);
+        final int safeSize = Math.min(Math.max(1, size), MAX_PAGE_SIZE);
+
+        log.info(
+                "Listing links: requestedPage={}, requestedSize={}, page={}, size={}",
+                page, size, safePage, safeSize
+        );
+
+        final Pageable pageable = PageRequest.of(
+                safePage,
+                safeSize,
+                Sort.by("createdAt").descending()
+        );
+
         return dbClient.findAll(pageable)
                 .map(this::toLinkDetailsOutput);
     }
+
 
     // ---------------------
     // Helper methods
