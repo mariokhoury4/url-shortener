@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Global Exception Handler for the URL Shortener Service
+ * Global Exception Handler for the URL Shortener Service.
  */
 @Log4j2
 @RestControllerAdvice(basePackages = "com.example.urlShortenerService")
