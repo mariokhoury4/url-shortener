@@ -56,12 +56,8 @@ public class UrlManagerImpl implements UrlManager {
         // Create the URL that should be saved in the Database
         final Url url = new Url(
                 targetUrl.value(),
-                createUrlInput.getCustomAlias() != null
-                        ? createUrlInput.getCustomAlias()
-                        : UUID.randomUUID().toString().substring(0, 10),
-                createUrlInput.getExpiresAt() != null
-                        ? createUrlInput.getExpiresAt()
-                        : LocalDateTime.now().plusYears(1));
+                resolveShortCode(createUrlInput),
+                resolveExpiration(createUrlInput.getExpiresAt()));
 
         // Save the Url to the DB
         final Url createdUrl;
@@ -163,5 +159,50 @@ public class UrlManagerImpl implements UrlManager {
                         .status(url.isExpired() ? LinkStatus.EXPIRED : LinkStatus.ACTIVE)
                         .build());
     }
+
+    // ---------------------
+    // Helper methods
+    // ---------------------
+
+    /**
+     * Resolve the short code for a URL creation request.
+     * <p>
+     * If the user provides a non-blank custom alias, it is returned as-is.
+     * Otherwise, a random 10-character alphanumeric code is generated.
+     *
+     * @param input the CreateUrlInput containing optional custom alias
+     * @return the resolved short code (never null or blank)
+     */
+    private String resolveShortCode(final CreateUrlInput input) {
+        if (input.getCustomAlias() != null && !input.getCustomAlias().isBlank()) {
+            return input.getCustomAlias().trim();
+        }
+
+        // Random UUID without hyphens, first 10 characters
+        return java.util.UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 10);
+    }
+
+    /**
+     * Resolve the expiration timestamp for a URL.
+     * <p>
+     * If the user provides an explicit expiration date, it is used.
+     * Otherwise, a default TTL of 1 year from now is applied.
+     * <p>
+     * NOTE: In a future enhancement, this logic can be made configurable
+     * through ShortenerProperties (default TTL, min/max TTL enforcement).
+     *
+     * @param requestedExpiry the expiration datetime supplied by the user (nullable)
+     * @return the resolved expiration datetime
+     */
+    private LocalDateTime resolveExpiration(final LocalDateTime requestedExpiry) {
+        if (requestedExpiry != null) {
+            return requestedExpiry;
+        }
+        return LocalDateTime.now().plusYears(1);
+    }
+
 
 }
