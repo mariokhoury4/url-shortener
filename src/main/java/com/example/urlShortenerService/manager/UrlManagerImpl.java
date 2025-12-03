@@ -29,10 +29,6 @@ import java.util.UUID;
 @Log4j2
 @Service
 public class UrlManagerImpl implements UrlManager {
-    /**
-     * The default domain
-     */
-    private static final String DEFAULT_DOMAIN = "http://localhost:8080/r/";
 
     private final UrlRepository dbClient;
     private final ShortenerProperties props;
@@ -59,7 +55,7 @@ public class UrlManagerImpl implements UrlManager {
 
         // Create the URL that should be saved in the Database
         final Url url = new Url(
-                createUrlInput.getTargetUrl(),
+                targetUrl.value(),
                 createUrlInput.getCustomAlias() != null
                         ? createUrlInput.getCustomAlias()
                         : UUID.randomUUID().toString().substring(0, 10),

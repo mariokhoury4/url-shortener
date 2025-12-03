@@ -62,11 +62,11 @@ public class UrlActivityTest {
         when(manager.createUrl(createUrlInput)).thenReturn(expectedCreateUrlOutput);
 
         // test
-        final CreateUrlOutput actualCreateUrlOutput = urlActivity.createUrl(createUrlInput);
+        final ResponseEntity<CreateUrlOutput> actualCreateUrlOutput = urlActivity.createUrl(createUrlInput);
 
         // assert
         verify(manager, times(1)).createUrl(createUrlInput);
-        assertEquals(expectedCreateUrlOutput, actualCreateUrlOutput);
+        assertEquals(expectedCreateUrlOutput, actualCreateUrlOutput.getBody());
     }
 
     @Test
@@ -165,11 +165,11 @@ public class UrlActivityTest {
         when(manager.listLinks(0, 20)).thenReturn(expected);
 
         // act
-        Page<LinkDetailsOutput> actual = urlActivity.listLinks(0, 20);
+        ResponseEntity<Page<LinkDetailsOutput>> actual = urlActivity.listLinks(0, 20);
 
         // assert
-        assertEquals(expected.getTotalElements(), actual.getTotalElements());
-        assertEquals(expected.getContent(), actual.getContent());
+        assertEquals(expected.getTotalElements(), actual.getBody().getTotalElements());
+        assertEquals(expected.getContent(), actual.getBody().getContent());
         verify(manager).listLinks(0, 20);
     }
 }

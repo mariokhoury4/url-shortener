@@ -42,9 +42,12 @@ public class UrlActivity {
      * @return The output
      */
     @PostMapping("/links")
-    public CreateUrlOutput createUrl(@Valid @RequestBody final CreateUrlInput createUrlInput) {
+    public ResponseEntity<CreateUrlOutput> createUrl(@Valid @RequestBody final CreateUrlInput createUrlInput) {
         log.info("HTTP POST /links received");
-        return manager.createUrl(createUrlInput);
+        CreateUrlOutput output = manager.createUrl(createUrlInput);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(output);
     }
 
     /**
@@ -63,9 +66,9 @@ public class UrlActivity {
     }
 
     /**
-     * Redirect to the Long URL from the short one.
+     * Get details about the short link.
      * @param shortCode the input short code
-     * @return redirect to the actual link
+     * @return link details (target URL, creation date, etc.)
      */
     @GetMapping("/links/{shortCode}")
     public ResponseEntity<LinkDetailsOutput> getLinkDetails(@PathVariable final String shortCode) {
@@ -80,12 +83,12 @@ public class UrlActivity {
      * @return the list of links
      */
     @GetMapping("/links")
-    public Page<LinkDetailsOutput> listLinks(
+    public ResponseEntity<Page<LinkDetailsOutput>> listLinks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         log.info("HTTP GET /links received");
-        return manager.listLinks(page, size);
+        return ResponseEntity.ok(manager.listLinks(page, size));
     }
 
 }
