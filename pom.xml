@@ -149,6 +149,7 @@
 									<excludes>
 										<exclude>com.example.urlShortenerService.model.*</exclude>
 										<exclude>com.example.urlShortenerService.exception.*</exclude>
+										<exclude>com.example.urlShortenerService.config.*</exclude>
 										<exclude>com.example.urlShortenerService.UrlShortenerServiceApplication</exclude>
 									</excludes>
 									<limits>

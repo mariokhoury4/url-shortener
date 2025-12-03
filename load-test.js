@@ -27,13 +27,15 @@ export function setup() {
   });
 
   const res = http.post(`${BASE_URL}/links`, payload, {
-    headers: { 'Content-Type': 'application/json' },
-    'X-API-KEY': API_KEY, // 🔐 added API key
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': API_KEY,      // ✅ inside headers
+    },
   });
 
   check(res, {
     'created mario-long': (r) =>
-      r.status === 200 || r.status === 201 || r.status === 409,
+      r.status === 201 || r.status === 409,
   });
 
   return {};
