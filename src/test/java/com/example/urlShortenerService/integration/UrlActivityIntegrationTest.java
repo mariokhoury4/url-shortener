@@ -45,6 +45,7 @@ class UrlActivityIntegrationTest {
         """;
 
         mockMvc.perform(post("/links")
+                        .header("X-API-KEY", "dev-key-123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())                          // or .isCreated() if you switch later
@@ -62,6 +63,7 @@ class UrlActivityIntegrationTest {
         """;
 
         mockMvc.perform(post("/links")
+                        .header("X-API-KEY", "dev-key-123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -79,6 +81,7 @@ class UrlActivityIntegrationTest {
         """;
 
         mockMvc.perform(post("/links")
+                        .header("X-API-KEY", "dev-key-123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -102,6 +105,7 @@ class UrlActivityIntegrationTest {
         """;
 
         mockMvc.perform(post("/links")
+                        .header("X-API-KEY", "dev-key-123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isConflict());

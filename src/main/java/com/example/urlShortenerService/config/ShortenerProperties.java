@@ -25,7 +25,13 @@ public class ShortenerProperties {
     /**
      * Default time-to-live (in days) for generated URLs when no explicit
      * expiration date is provided in the CreateUrlInput.
-     * Example: 365 = 1 year
+     * Example: 365 = 1 year.
      */
-    private int defaultTtlDays = 365; // sensible default
+    private int defaultTtlDays = 365;
+
+    /**
+     * Shared API key required to access protected endpoints such as POST /links.
+     * Example: "super-secret-key".
+     */
+    private String apiKey;
 }

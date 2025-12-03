@@ -47,4 +47,11 @@ public class GlobalExceptionHandler {
         final ErrorResponse body = new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body); // 500
     }
+
+    @ExceptionHandler(ApiKeyUnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleApiKeyUnauthorized(final ApiKeyUnauthorizedException ex) {
+        log.warn("Unauthorized request: {}", ex.getMessage());
+        final ErrorResponse body = new ErrorResponse("UNAUTHORIZED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body); // 401
+    }
 }
