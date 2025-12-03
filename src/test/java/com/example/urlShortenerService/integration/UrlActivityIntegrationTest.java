@@ -47,7 +47,7 @@ class UrlActivityIntegrationTest {
         mockMvc.perform(post("/links")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isOk())                          // or .isCreated() if you switch later
+                .andExpect(status().isCreated())                          // or .isCreated() if you switch later
                 .andExpect(jsonPath("$.shortCode").exists())
                 .andExpect(jsonPath("$.shortUrl").exists())
                 .andExpect(jsonPath("$.targetUrl").value("https://example.com/test"));
@@ -64,7 +64,7 @@ class UrlActivityIntegrationTest {
         mockMvc.perform(post("/links")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.targetUrl").value("https://example.com/generated"))
                 .andExpect(jsonPath("$.shortCode").isString())
                 .andExpect(jsonPath("$.shortCode").isNotEmpty());
