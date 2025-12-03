@@ -199,7 +199,7 @@ public class UrlManagerImpl implements UrlManager {
         if (requestedExpiry != null) {
             return requestedExpiry;
         }
-        return LocalDateTime.now().plusYears(1);
+        return LocalDateTime.now().plusYears(props.getDefaultTtlDays());
     }
 
     /**
