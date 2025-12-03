@@ -17,6 +17,8 @@ export const options = {
 };
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
+const API_KEY = __ENV.API_KEY || 'dev-key-123'; // must match shortener.api-key locally
+
 
 export function setup() {
   const payload = JSON.stringify({
@@ -26,6 +28,7 @@ export function setup() {
 
   const res = http.post(`${BASE_URL}/links`, payload, {
     headers: { 'Content-Type': 'application/json' },
+    'X-API-KEY': API_KEY, // 🔐 added API key
   });
 
   check(res, {
