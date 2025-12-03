@@ -123,20 +123,9 @@ public class UrlManagerImpl implements UrlManager {
                     return new ShortUrlNotFoundException("Short URL not found");
                 });
 
-        final boolean expired = url.isExpired();
-        final LinkStatus status = expired ? LinkStatus.EXPIRED : LinkStatus.ACTIVE;
-
-        log.info("LinkDetails delivered: alias={}, status={}", shortCode, status);
-        return LinkDetailsOutput.builder()
-                .shortCode(url.getCustomAlias())
-                .shortUrl(props.getRedirectDomain() + url.getCustomAlias())
-                .targetUrl(url.getTargetUrl())
-                .createdAt(url.getCreatedAt())
-                .expiresAt(url.getExpiresAt())
-                .clickCount(url.getClickCount())
-                .lastAccessedAt(url.getLastAccessedAt())
-                .status(status)
-                .build();
+        final LinkDetailsOutput output = toLinkDetailsOutput(url);
+        log.info("LinkDetails delivered: alias={}, status={}", shortCode, output.getStatus());
+        return output;
     }
 
 
@@ -145,19 +134,10 @@ public class UrlManagerImpl implements UrlManager {
      */
     @Override
     public Page<LinkDetailsOutput> listLinks(final int page, final int size) {
-        log.info("Listing all links");
+        log.info("Listing all links: page={}, size={}", page, size);
         final Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return dbClient.findAll(pageable)
-                .map(url -> LinkDetailsOutput.builder()
-                        .shortCode(url.getCustomAlias())
-                        .shortUrl(props.getRedirectDomain() + url.getCustomAlias())
-                        .targetUrl(url.getTargetUrl())
-                        .createdAt(url.getCreatedAt())
-                        .expiresAt(url.getExpiresAt())
-                        .clickCount(url.getClickCount())
-                        .lastAccessedAt(url.getLastAccessedAt())
-                        .status(url.isExpired() ? LinkStatus.EXPIRED : LinkStatus.ACTIVE)
-                        .build());
+                .map(this::toLinkDetailsOutput);
     }
 
     // ---------------------
@@ -202,6 +182,31 @@ public class UrlManagerImpl implements UrlManager {
             return requestedExpiry;
         }
         return LocalDateTime.now().plusYears(1);
+    }
+
+    /**
+     * Map a {@link Url} entity to a {@link LinkDetailsOutput} DTO.
+     * <p>
+     * This method centralizes the transformation logic so that any change
+     * in the link details representation is done in a single place.
+     *
+     * @param url the Url entity to map
+     * @return a LinkDetailsOutput view of the given URL
+     */
+    private LinkDetailsOutput toLinkDetailsOutput(final Url url) {
+        final boolean expired = url.isExpired();
+        final LinkStatus status = expired ? LinkStatus.EXPIRED : LinkStatus.ACTIVE;
+
+        return LinkDetailsOutput.builder()
+                .shortCode(url.getCustomAlias())
+                .shortUrl(props.getRedirectDomain() + url.getCustomAlias())
+                .targetUrl(url.getTargetUrl())
+                .createdAt(url.getCreatedAt())
+                .expiresAt(url.getExpiresAt())
+                .clickCount(url.getClickCount())
+                .lastAccessedAt(url.getLastAccessedAt())
+                .status(status)
+                .build();
     }
 
 
